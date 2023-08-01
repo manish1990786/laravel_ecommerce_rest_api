@@ -59,19 +59,9 @@ class OrderRepository implements OrderRepositoryInterface
         return Order::whereId($orderId)->update($newDetails);
     }
 
-    public function makeOrderPayment(array $orderPaymentDetails){
-        $client = new \GuzzleHttp\Client();
-        $url = "https://superpay.view.agentur-loop.com/pay";
-        
-        $response = $client->post($url,  [
-            'body' => json_encode($orderPaymentDetails)
-        ]);
-
-        $returnResponse = json_decode($response->getBody());
-        if($returnResponse->message == "Payment Successful"){
-            $this->updateOrder($orderPaymentDetails['order_id'],['payment_status' => 1]);
-        }
-        return $returnResponse->message;
+    public function makeOrderPayment(array $orderPaymentDetails, $paymentProvider){
+        $returnResponse = $paymentProvider->makePayment($orderPaymentDetails);
+        return $returnResponse;
     }
 
     public function addProductToExistingOrder($orderId, array $newDetails) 

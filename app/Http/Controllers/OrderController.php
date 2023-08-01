@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Interfaces\Order\OrderRepositoryInterface;
+use App\Interfaces\PaymentProviders\SuperPaymentProviderInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -14,10 +15,12 @@ class OrderController extends Controller
 {
 
     private OrderRepositoryInterface $orderRepository;
+    private SuperPaymentProviderInterface $paymentProvider;
 
-    public function __construct(OrderRepositoryInterface $orderRepository) 
+    public function __construct(OrderRepositoryInterface $orderRepository, SuperPaymentProviderInterface $paymentProvider) 
     {
         $this->orderRepository = $orderRepository;
+        $this->paymentProvider = $paymentProvider;
     }
 
     /**
@@ -70,7 +73,7 @@ class OrderController extends Controller
                 'value'
             ]);
             
-            $response = $this->orderRepository->makeOrderPayment($orderPaymentDetails);
+            $response = $this->orderRepository->makeOrderPayment($orderPaymentDetails, $this->paymentProvider);
             
             return response()->json(
                 [
